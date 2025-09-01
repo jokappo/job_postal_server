@@ -4,7 +4,7 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
-//import authRoute from "./routes/auth.route.js";
+import authRoutes from "./routes/auth.route.js";
 
 dotenv.config();
 
@@ -28,7 +28,7 @@ connectDB();
 app.use(express.json());
 
 // routes
-//app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 
 // serve upload
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
