@@ -65,52 +65,57 @@ export const applyToJob = async (req, res) => {
 
 //@desc get loggin user's applications
 export const getMyApplications = async (req, res) => {
-    try {
-        
-    } catch (error) {
-        return res.status(500).json({
-            error: true,
-            success: false,
-            message: error.message || error
-        });
-    }
-}
+  try {
+    const userId = req.user._id;
+    const applications = await ApplicationModel.find({ applicant: userId })
+      .populate("job", "tittle company location type")
+      .sort({ createdAt: -1 });
+    return res.status(200).json({
+      error: false,
+      success: true,
+      data: applications,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      success: false,
+      message: error.message || error,
+    });
+  }
+};
 
 //@desc get applicants for a specific job(for employers)
 export const getApplicantsForJob = async (req, res) => {
-    try {
-        
-    } catch (error) {
-        return res.status(500).json({
-            error: true,
-            success: false,
-            message: error.message || error
-        });
-    }
-}
+  try {
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      success: false,
+      message: error.message || error,
+    });
+  }
+};
 
 //@desc get application by id(jobseekers and employers)
 export const getApplicationById = async (req, res) => {
-    try {
-        
-    } catch (error) {
-        return res.status(500).json({
-            error: true,
-            success: false,
-            message: error.message || error
-        })
-    }
-}
+  try {
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      success: false,
+      message: error.message || error,
+    });
+  }
+};
 
 //@desc update application status(for employers)
 export const updateStatus = async (req, res) => {
-    try {
-        
-    } catch (error) {
-        return res.status(500).json({
-            error: true,
-            success: false,
-            message: error.message || error
-        })
-    }
-}
+  try {
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      success: false,
+      message: error.message || error,
+    });
+  }
+};
