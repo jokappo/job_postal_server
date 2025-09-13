@@ -34,7 +34,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/jobs", jobsRoutes);
-app.use("api/applications", ApplicationRouter);
+app.use("/api/applications", ApplicationRouter);
 
 // serve upload
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
