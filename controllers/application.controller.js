@@ -45,7 +45,7 @@ export const applyToJob = async (req, res) => {
     const application = await ApplicationModel.create({
       job: jobId,
       applicant: userId,
-      resume: req.user.resume || '',
+      resume: req.user.resume || "",
     });
 
     return res.status(201).json({
@@ -88,11 +88,55 @@ export const getMyApplications = async (req, res) => {
 //@desc get applicants for a specific job(for employers)
 export const getApplicantsForJob = async (req, res) => {
   try {
+    const jobId = req.params.jobId;
+    const userId = req.user._id;
+    const { role } = req.user;
+
+    // Validation de l'utilisateur : Seuls les employeurs sont autorisés
+    if (role !== "employer") {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Accès refusé. Seuls les employeurs peuvent voir les candidats.",
+      });
+    }
+
+    // Vérification de l'appartenance de l'offre d'emploi
+    // On s'assure que l'offre existe ET qu'elle appartient à l'employeur connecté.
+    const job = await JobModel.findOne({ _id: jobId, company: userId }).lean();
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Offre d'emploi non trouvée ou accès non autorisé.",
+      });
+    }
+
+    // Récupération des candidatures
+    const applications = await ApplicationModel.find({ job: jobId })
+      .populate("applicant", "name email avatar resume")
+      .populate("job", "tittle company location type")
+      .lean();
+
+    // Gestion du cas où il n'y a pas de candidatures
+    // Renvoyer 200 avec un tableau vide est plus sémantique que 404.
+    if (applications.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: "Aucun candidat trouvé pour cette offre d'emploi.",
+      });
+    }
+
+    // Réponse finale
+    return res.status(200).json({
+      success: true,
+      data: applications,
+    });
   } catch (error) {
     return res.status(500).json({
-      error: true,
       success: false,
-      message: error.message || error,
+      message: error.message || "Erreur interne du serveur.",
     });
   }
 };
