@@ -45,7 +45,7 @@ export const applyToJob = async (req, res) => {
     const application = await ApplicationModel.create({
       job: jobId,
       applicant: userId,
-      resume: req.body.resume,
+      resume: req.user.resume || '',
     });
 
     return res.status(201).json({
@@ -76,6 +76,7 @@ export const getMyApplications = async (req, res) => {
       data: applications,
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       error: true,
       success: false,
