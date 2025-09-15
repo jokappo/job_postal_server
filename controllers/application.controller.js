@@ -144,11 +144,45 @@ export const getApplicantsForJob = async (req, res) => {
 //@desc get application by id(jobseekers and employers)
 export const getApplicationById = async (req, res) => {
   try {
+    const userId = req.user._id;
+    const appId = req.params.id;
+
+    const app = await ApplicationModel.findById(appId)
+      .populate("job", "title company location type")
+      .populate("applicant", "name email avatar resume")
+      .lean();
+
+    if (!app) {
+      return res.status(404).json({
+        error: true,
+        success: false,
+        message: "Candidature non trouvée.",
+      });
+    }
+
+    const isOwner = app.applicant._id.toString() === userId.toString();
+    const isEmployer = app.job.company.toString() === userId.toString();
+
+    if (!isOwner && !isEmployer) {
+      return res.status(403).json({
+        error: true,
+        success: false,
+        message:
+          "Accès refusé. Vous n'êtes pas autorisé à voir cette candidature.",
+      });
+    }
+
+    return res.status(200).json({
+      error: false,
+      success: true,
+      data: app,
+    });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       error: true,
       success: false,
-      message: error.message || error,
+      message: error.message || "Erreur interne du serveur.",
     });
   }
 };
