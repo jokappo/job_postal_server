@@ -243,7 +243,7 @@ export const updateStatus = async (req, res) => {
       error: false,
       success: true,
       data: updatedApp,
-      message: "Statut de candidature mis à jour avec succès.",
+      message: `Statut de candidature mis à jour avec succès. status : ${status}`,
     });
   } catch (error) {
     console.error(error);
