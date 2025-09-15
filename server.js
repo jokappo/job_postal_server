@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import jobsRoutes from "./routes/job.route.js";
 import ApplicationRouter from "./routes/application.route.js";
+import saveJobRouter from "./routes/savedjob.route.js";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/jobs", jobsRoutes);
 app.use("/api/applications", ApplicationRouter);
+app.use("/api/saved-jobs", saveJobRouter);
 
 // serve upload
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
