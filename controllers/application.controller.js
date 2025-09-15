@@ -190,11 +190,67 @@ export const getApplicationById = async (req, res) => {
 //@desc update application status(for employers)
 export const updateStatus = async (req, res) => {
   try {
+    const { status } = req.body;
+    const appId = req.params.id;
+    const userId = req.user._id;
+    const { role } = req.user;
+
+    // Valider le rôle en premier pour éviter une requête inutile
+    if (role !== "employer") {
+      return res.status(403).json({
+        error: true,
+        success: false,
+        message: "Seuls les employeurs peuvent mettre à jour le statut.",
+      });
+    }
+
+    // Valider les valeurs de statut autorisées
+    const validStatuses = ["Applied", "In Review", "Accepted", "Rejected"];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        error: true,
+        success: false,
+        message: `Statut de candidature invalide. Les statuts valides sont : ${validStatuses.join(
+          ", "
+        )}.`,
+      });
+    }
+
+    // Chercher la candidature et vérifier l'appartenance
+    const app = await ApplicationModel.findById(appId).populate("job", "company");
+
+    // Cette vérification s'assure que l'employeur est bien le propriétaire de l'offre
+    if (!app || app.job.company.toString() !== userId.toString()) {
+      return res.status(404).json({
+        error: true,
+        success: false,
+        message: "Candidature non trouvée ou accès non autorisé.",
+      });
+    }
+
+    // Mettre à jour et sauvegarder en une seule étape
+    const updatedApp = await ApplicationModel.findByIdAndUpdate(
+      appId,
+      { status },
+      { new: true } // Renvoie le document mis à jour
+    )
+      .populate("job", "title company location type")
+      .populate("applicant", "name email avatar resume")
+      .lean();
+
+    // Renvoyer la réponse avec les données complètes
+    return res.status(200).json({
+      error: false,
+      success: true,
+      data: updatedApp,
+      message: "Statut de candidature mis à jour avec succès.",
+    });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       error: true,
       success: false,
-      message: error.message || error,
+      message: error.message || "Une erreur inattendue est survenue.",
     });
   }
 };
